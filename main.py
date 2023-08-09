@@ -2,6 +2,10 @@ import json
 import PyPtt
 import os
 from dotenv import dotenv_values
+from collections import namedtuple
+from typing import List
+
+Post = namedtuple('Post', ["id", "title", "index"])
 
 class LastStatus:
     def __init__(self):
@@ -24,27 +28,24 @@ class LastStatus:
         with open("last_status", "w") as f:
             json.dump(self.data, f)
 
-    def set(self, id, value, condition):
-        data = [id, value, condition]
-        obj = self.find(id)
-        if obj != None:
-            _, index, _ = obj
+    def set(self, board, value, condition):
+        data = [board, value, condition]
+        index = self.find(board, condition)
+
+        if index != None:
             self.data[index] = data
         else:
             self.data.append(data)
 
-    def get(self, id):
-        obj = self.find(id)
-        if obj != None:
-            _, index, condition = obj
-            return (index, condition)
-        return None
+    def get(self, i):
+        if len(self.data) < i:
+            return None
+        return self.data[i]
 
-    def find(self, id):
-        for (i, x) in enumerate(self.data):
-            if x[0] == id:
-                return (i, x[1], x[2])
-        return None
+    def find(self, board, condition):
+        for i, data in enumerate(self.data):
+            if data[0] == board and data[2] == condition:
+                return i
 
 def get_post(ptt, board, limit=10, index=0, condition=None):
     newest_index = ptt.get_newest_index(PyPtt.NewIndex.BOARD, board, search_condition=condition, search_type=PyPtt.SearchType.KEYWORD)
@@ -81,35 +82,31 @@ def get_post(ptt, board, limit=10, index=0, condition=None):
 
     return posts
 
-def extract_post(post):
-    return (post["aid"], post["title"], post["index"])
+def extract_post(post) -> Post:
+    return Post(post["aid"], post["title"], post["index"])
 
-def extract_posts(posts):
+def extract_posts(posts) -> List[Post]:
     return list(map(extract_post, posts))
 
-def process(posts):
-    print(posts)
+def process(posts: List[Post]):
+    for post in posts:
+        print(post.title, post.id, post.index)
 
 if __name__ == "__main__":
     config = dotenv_values(".env")
     status = LastStatus()
-    boards = status.get_boards_list()
     ptt = PyPtt.API()
     posts = []
 
     try:
         ptt.login(config.get("username"), config.get("pw"))
 
-        for board in boards:
+        for i, data in enumerate(status.data):
+            board, index, condition = status.get(i)
+            if board == None:
+                continue
+
             print("Getting posts from " + board)
-
-            index = 0
-            condition = None
-            s = status.get(board)
-            if s != None:
-                index = s[0]
-                condition = s[1]
-
             posts = extract_posts(get_post(ptt, board, index=index, condition=condition))
 
             if len(posts) > 0:
