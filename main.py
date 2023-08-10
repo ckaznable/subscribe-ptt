@@ -131,6 +131,7 @@ def main():
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 
+        print("processing {} posts".format(len(posts)))
         task = loop.create_task(process(bot, config.get("tg_bot_chat_id"), posts))
         if not loop.is_running():
             loop.run_until_complete(task)
