@@ -93,6 +93,9 @@ def extract_posts(posts) -> List[Post]:
     return list(map(extract_post, posts))
 
 async def process(bot, chat_id, posts: List[Post]):
+    if len(posts) == 0:
+        return None
+
     batch_size = 10
     batches = [posts[i:i+batch_size] for i in range(0, len(posts), batch_size)]
 
