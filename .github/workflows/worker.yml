@@ -13,14 +13,12 @@ jobs:
     name: Crawling PTT
     runs-on: ubuntu-latest
     steps:
-      - name: checkout maset
-        uses: actions/checkout@v3
-
       - name: checkout runner
         uses: actions/checkout@v3
         with:
           ref: runner
       - run: |
+          git fetch
           git config pull.rebase false
           git pull origin master
 
