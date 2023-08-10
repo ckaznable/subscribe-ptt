@@ -106,8 +106,8 @@ if __name__ == "__main__":
             if board == None:
                 continue
 
-            print("Getting posts from " + board)
-            posts = extract_posts(get_post(ptt, board, index=index, condition=condition))
+            print("Getting posts from {} with '{}' condition".format(board, condition))
+            posts.extend(extract_posts(get_post(ptt, board, index=index, condition=condition)))
 
             if len(posts) > 0:
                 status.set(board, posts[0][2], condition)
