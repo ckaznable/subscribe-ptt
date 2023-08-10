@@ -1,11 +1,15 @@
 import json
 import PyPtt
 import os
+import asyncio
+import telegram
+
 from dotenv import dotenv_values
 from collections import namedtuple
 from typing import List
 
-Post = namedtuple('Post', ["id", "title", "index"])
+
+Post = namedtuple('Post', ["id", "title", "index", "url"])
 
 class LastStatus:
     def __init__(self):
@@ -83,25 +87,34 @@ def get_post(ptt, board, limit=10, index=0, condition=None):
     return posts
 
 def extract_post(post) -> Post:
-    return Post(post["aid"], post["title"], post["index"])
+    return Post(post["aid"], post["title"], post["index"], post["url"])
 
 def extract_posts(posts) -> List[Post]:
     return list(map(extract_post, posts))
 
-def process(posts: List[Post]):
-    for post in posts:
-        print(post.title, post.id, post.index)
+async def process(bot, chat_id, posts: List[Post]):
+    batch_size = 10
+    batches = [posts[i:i+batch_size] for i in range(0, len(posts), batch_size)]
 
-if __name__ == "__main__":
+    for posts in batches:
+        text = ""
+        for post in posts:
+            text += "{}\n{}\n\n".format(post.title, post.url)
+
+        async with bot:
+            await bot.send_message(chat_id=chat_id, text=text)
+
+def main():
     config = dotenv_values(".env")
     status = LastStatus()
     ptt = PyPtt.API()
     posts = []
 
     try:
+        bot = telegram.Bot(config.get("tg_bot_token"))
         ptt.login(config.get("username"), config.get("pw"))
 
-        for i, data in enumerate(status.data):
+        for i, _ in enumerate(status.data):
             board, index, condition = status.get(i)
             if board == None:
                 continue
@@ -112,8 +125,19 @@ if __name__ == "__main__":
             if len(posts) > 0:
                 status.set(board, posts[0][2], condition)
 
-        process(posts)
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        task = loop.create_task(process(bot, config.get("tg_bot_chat_id"), posts))
+        if not loop.is_running():
+            loop.run_until_complete(task)
 
     finally:
         ptt.logout()
         status.save()
+
+if __name__ == "__main__":
+    main()
