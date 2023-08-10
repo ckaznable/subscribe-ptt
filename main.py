@@ -66,7 +66,7 @@ def get_post(ptt, board, limit=10, index=0, condition=None):
         newest_count += 1
 
         if index >= cur_index:
-            continue
+            break
 
         post = ptt.get_post(board, index=cur_index, search_condition=condition, search_type=PyPtt.SearchType.KEYWORD)
 
