@@ -37,6 +37,18 @@ jobs:
           echo tg_bot_token=${{ secrets.TG_BOT_TOKEN }} >> .env
           echo tg_bot_chat_id=${{ secrets.TG_BOT_CHAT_ID }} >> .env
 
+      - name: install openvpn
+        run: |
+          sudo apt update
+          sudo apt install -y openvpn openvpn-systemd-resolved
+
+      - name: connect to VPN
+        uses: "kota65535/github-openvpn-connect-action@v2"
+        with:
+          config_file: ./github/workflows/client.ovpn
+          username: ${{ secrets.OVPN_USERNAME }}
+          password: ${{ secrets.OVPN_PASSWORD }}
+
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
