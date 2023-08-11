@@ -23,9 +23,11 @@ jobs:
           git pull origin master
 
       - name: create queue
-        run: |
-          touch queue
-          echo ${{ secrets.WORKS }} > queue
+        id: create-json
+        uses: jsdaniell/create-json@v1.2.2
+        with:
+          name: "queue"
+          json: ${{ secrets.WORKS }}
 
       - name: create .env
         run: |
