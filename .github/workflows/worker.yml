@@ -22,7 +22,7 @@ jobs:
           git config user.email github-actions@github.com
           git fetch
           git config pull.rebase false
-          git pull origin master --allow-unrelated-histories
+          git pull origin master --allow-unrelated-histories --no-edit
 
       - name: create queue
         id: create-json
