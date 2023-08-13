@@ -126,7 +126,8 @@ def main():
             posts.extend(extract_posts(get_post(ptt, board, index=index, condition=condition)))
 
             if len(posts) > 0:
-                status.set(board, posts[0][2], condition)
+                for post in posts:
+                    status.set(board, post[2], condition)
 
         try:
             loop = asyncio.get_event_loop()
