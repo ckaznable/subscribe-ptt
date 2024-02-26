@@ -11,9 +11,13 @@
 4. 在Repository secrets的地方輸入以下這些變數跟值
 
 `USERNAME` ptt 帳號
+
 `PASSWORD` ptt 密碼
+
 `TG_BOT_CHAT_ID` telegram 聊天室id
+
 `TG_BOT_TOKEN` telegram bot token
+
 `OVPN_USERNAME` 跟 `OVPN_PASSWORD` 是VPN需要的帳號密碼
 
 `WORKS` 是你要訂閱的版跟文章關鍵字組合 如下面範例 可以多個
